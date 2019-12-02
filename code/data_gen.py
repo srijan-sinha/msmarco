@@ -48,7 +48,9 @@ def write_to_file(file1, file2):
 
 start = time()
 count1 = 0
-for i in range(70000000):
+n = 6000000
+print ("Creating small and large training datasets from the first ", n, " lines of top1000 file")
+for i in range(n):
     datapoint = f.readline()
     temp = datapoint.strip().split('\t')
     temp[0] = int(temp[0])
@@ -64,8 +66,8 @@ for i in range(70000000):
         if (np.random.binomial(n=1,p=0.01) == 1):
             add_to_train_set(temp, rel=0)
     if ((i+1)%20000 == 0):
-        print(i+1)
-    if (i%500000 == 0):
+        print ((i+1)," lines done")
+    if (i == 500000):
         write_to_file(data_file_small, data_id_file_small)
 write_to_file(data_file_large, data_id_file_large)
 end = time()

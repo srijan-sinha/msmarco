@@ -26,7 +26,7 @@ parts.append(eval_data[3811380:4763568,:].copy())
 parts.append(eval_data[4763568:5716818,:].copy())
 parts.append(eval_data[5716818:,:].copy())
 # parts.append(eval_data[0:18841:,:].copy())
-
+print ("Writing test data in usable form alongwith splitting into 7 parts.")
 for i in range(len(parts)):
     q_d = parts[i][:,2:]
     write = pd.DataFrame(q_d)

@@ -15,13 +15,7 @@ from pytorch_transformers import AdamW as BertAdam
 from tqdm import tqdm, trange
 import pickle as pkl
 import math
-# import sys
 import argparse
-
-# sys.argv: 1 is part number
-#         2 is model file 
-#         3 is placeholder for logitsfile
-#         4 is placeholder for trecinput
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-t', action="store", dest="test_folder", help="folder containing test data")
@@ -61,7 +55,7 @@ query_ids = train_id[:,0:1].flatten()
 passsage_ids = train_id[:,1:2].flatten()
 
 if (evaluate_input):
-
+  print ("Print loading model")
   file = open(model_file,"rb")
   model = pkl.load(file)
   file.close()
@@ -85,9 +79,11 @@ if (evaluate_input):
   MAX_LENGTH_PASSAGE = 96
 
   if (load_input):
+    print ("Loading saved test input ids")
     file = open(input_id_file, "rb")
     input_id = pkl.load(file)
   else:
+    print ("Creating input ids from raw test data")
     input_id_query = customtok(MAX_LENGTH_QUERY, queries, 0)
     input_id_passage = customtok(MAX_LENGTH_PASSAGE, passages, 1)
 
@@ -95,6 +91,7 @@ if (evaluate_input):
     input_id_passage = np.array(input_id_passage)
     input_id = np.concatenate((input_id_query, input_id_passage), axis=1)
 
+    print ("Saving the created input ids for fast load next time")
     file = open(input_id_file, "wb")
     pkl.dump(input_id, file)
     file.close()
@@ -132,6 +129,7 @@ if (evaluate_input):
   eval_loss, eval_accuracy = 0, 0
   nb_eval_steps, nb_eval_examples = 0, 0
 
+  print ("Beginning testing")
   logitsall = np.empty((0,2))
   for batch in eval_dataloader:
       batch = tuple(t.to(device) for t in batch)
@@ -146,12 +144,13 @@ if (evaluate_input):
       nb_eval_steps += 1
       print(nb_eval_steps*batch_size)
 
-  # file = open("./test_data/logits_"+(str(sys.argv[3]))+str(part)+".pkl", "wb")
+  print ("Saving logits")
   file = open(logits_file, "wb")
   pkl.dump(logitsall, file)
   file.close()
 
 else:
+  print ("Using saved logits")
   file = open(logits_file,"rb")
   model = pkl.load(file)
   file.close()
@@ -185,7 +184,8 @@ def writeToFile(filename, rankmap):
            f.write(tempstr)
    f.close()
    
+print ("Creating rankings")
 rankmap = rankedfromlogit(logitsall, query_ids, passsage_ids)
-
+print ("Writing to file")
 writeToFile(trec_input_file, rankmap)
 

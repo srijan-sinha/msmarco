@@ -61,14 +61,17 @@ MAX_LENGTH_PASSAGE = 96
 
 
 if (load_input):
+    print ("Loading input ids for training")
     file = open(load_input_file, "rb")
     input_id = pkl.load(file)
 else:
+    print ("Creating input ids from raw training data")
     input_id_query = customtok(MAX_LENGTH_QUERY, queries, 0)
     input_id_passage = customtok(MAX_LENGTH_PASSAGE, passages, 1)
     input_id_query = np.array(input_id_query)
     input_id_passage = np.array(input_id_passage)
     input_id = np.concatenate((input_id_query, input_id_passage), axis=1)
+    print ("Storing input ids for fast load next time")
     file = open(store_input_file, 'wb')
     pkl.dump(input_id, file)
     file.close()
@@ -87,7 +90,7 @@ train_masks, validation_masks, _, _ = train_test_split(attention_mask, input_id,
                                              random_state=2018, test_size=0.1)
 train_segments, validation_segments, _, _ = train_test_split(segment_mask, input_id,
                                              random_state=2018, test_size=0.1)
-
+print ("Converting arrays to tensors")
 train_inputs = torch.tensor(train_inputs, dtype=torch.long)
 validation_inputs = torch.tensor(validation_inputs, dtype=torch.long)
 train_labels = torch.tensor(train_labels, dtype=torch.long)
@@ -131,10 +134,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 n_gpu = torch.cuda.device_count()
 torch.cuda.get_device_name(0)
 
+print ("Beginning training")
+
 train_loss_set = []
-
 epochs = 4
-
 epochctr = 0
 for _ in trange(epochs, desc="Epoch"):
   
